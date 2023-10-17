@@ -20,7 +20,7 @@ jobs:
           for ALLOWED_LABEL in "${ALLOWED_LABEL_ARRAY[@]}"; do
             if echo "$PR_LABELS" | grep -q "$ALLOWED_LABEL"; then
               echo "Label '$ALLOWED_LABEL' is assigned to the pull request."
-              echo "::set-output name=TAGGING_LABEL::$ALLOWED_LABEL"
+              echo "echo "TAGGING_LABEL=$ALLOWED_LABEL" >> $GITHUB_OUTPUT"
               break
             fi
           done
