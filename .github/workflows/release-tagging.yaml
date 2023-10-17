@@ -10,13 +10,11 @@ jobs:
   release-on-push:
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - id: release
-        uses: rymndhng/release-on-push-action@master
+      - uses: rymndhng/release-on-push-action@master
         with:
           bump_version_scheme: minor
-          tag_prefix: v
           
       - name: Check Output Parameters
         run: |
