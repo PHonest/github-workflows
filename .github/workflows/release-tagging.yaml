@@ -12,10 +12,37 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - id: release
+      - name: Check and set TAGGING_LABEL
+        id: label-check
+        run: |
+          ALLOWED_LABELS="minor major patch"
+          IFS=" " read -ra ALLOWED_LABEL_ARRAY <<< "$ALLOWED_LABELS"
+          PR_LABELS=$(jq -r ".pull_request.labels[].name" "$GITHUB_EVENT_PATH")
+
+          for ALLOWED_LABEL in "${ALLOWED_LABEL_ARRAY[@]}"; do
+            if echo "$PR_LABELS" | grep -q "$ALLOWED_LABEL"; then
+              echo "Label '$ALLOWED_LABEL' is assigned to the pull request."
+              echo "::set-output name=TAGGING_LABEL::$ALLOWED_LABEL"
+              break
+            fi
+          done
+
+          if [ -z "${{ steps.label-check.outputs.TAGGING_LABEL }}" ]; then
+            echo "None of the allowed labels (minor, major, patch) is assigned to the pull request. Stopping workflow."
+            exit 1
+          fi
+        env:
+          ALLOWED_LABELS: minor major patch
+
+      - name: Use TAGGING_LABEL
+        if: steps.label-check.outputs.TAGGING_LABEL
+        run: echo "The assigned TAGGING_LABEL is $TAGGING_LABEL"
+
+      - name: Build tag
+        id: release
         uses: rymndhng/release-on-push-action@master
         with:
-          bump_version_scheme: minor
+          bump_version_scheme: ${{steps.label-check.outputs.TAGGING_LABEL}}
           tag_prefix: v
           
       - name: Check Output Parameters
