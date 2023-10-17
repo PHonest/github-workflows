@@ -25,7 +25,7 @@ jobs:
             fi
           done
 
-          if [ -z "${{ steps.label-check.outputs.TAGGING_LABEL }}" ]; then
+          if [ -z "$TAGGING_LABEL" ]; then
             echo "None of the allowed labels (minor, major, patch) is assigned to the pull request. Stopping workflow."
             exit 1
           fi
