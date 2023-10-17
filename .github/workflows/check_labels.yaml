@@ -1,0 +1,34 @@
+name: Check and Set TAGGING_LABEL
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check_labels:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check for allowed labels
+        id: label-check
+        run: |
+          ALLOWED_LABELS="minor major patch"
+          IFS=" " read -ra ALLOWED_LABEL_ARRAY <<< "$ALLOWED_LABELS"
+          PR_LABELS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/labels" | jq -r '.[].name')
+
+          for ALLOWED_LABEL in "${ALLOWED_LABEL_ARRAY[@]}"; do
+            if echo "$PR_LABELS" | grep -q "$ALLOWED_LABEL"; then
+              echo "Label '$ALLOWED_LABEL' is assigned to the pull request."
+              echo "::set-output name=TAGGING_LABEL::$ALLOWED_LABEL"
+              break
+            fi
+          done
+
+          if [ -z "${{ steps.label-check.outputs.TAGGING_LABEL }}" ]; then
+            echo "None of the allowed labels (minor, major, patch) is assigned to the pull request. Stopping workflow."
+            exit 1
+          fi
+
+      - name: Use TAGGING_LABEL
+        run: echo "The assigned TAGGING_LABEL is ${{ steps.label-check.outputs.TAGGING_LABEL }}"
