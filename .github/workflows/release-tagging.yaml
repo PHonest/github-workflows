@@ -4,10 +4,8 @@ name: Test Workflow
 
 on: 
   push:
-    branches: [dev, main] 
+    branches: [main] 
 
-
-    
 jobs:
   release-on-push:
     runs-on: ubuntu-latest
