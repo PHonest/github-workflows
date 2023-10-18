@@ -1,0 +1,30 @@
+
+---
+name: Test Workflow
+
+on: 
+  push:
+    branches: [main] 
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: '0'
+
+    - name: Bump version and push tag
+      id: bump-tag
+      uses: anothrNick/github-tag-action@1.64.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        WITH_V: false
+
+    - name: Build Image
+      run: |
+        echo "Building Image"
+        echo "Old Tag ${{ steps.bump-tag.outputs.tag }}"
+        echo "New Tag ${{ steps.bump-tag.outputs.new_tag }}"

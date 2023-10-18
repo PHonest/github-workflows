@@ -1,0 +1,14 @@
+name: Check and Set TAGGING_LABEL
+
+on:
+  pull_request:
+    branches: '*'
+
+jobs:
+  check_labels:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Running Tests
+        run: |
+          echo "Running Tests"
